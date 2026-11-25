@@ -1,4 +1,4 @@
-
+# V2 — .gitignore
 .env
 .env.*
 !.env.example
@@ -7,23 +7,25 @@ __pycache__/
 *.py[cod]
 .venv/
 venv/
+.agents/
 node_modules/
 dist/
 
-*.pkl
-*.pt
-*.pth
-*.npz
-*.npy
-
+# Data & artefak lokal V2
+data/
+exports/*
+!exports/.gitkeep
+logs/
 *.db
 *.sqlite
 *.sqlite3
-
-data/
-models/
-exports/*
-!exports/.gitkeep
-snapshots/*
-static/snapshots/*
 *.log
+
+# Biometrik & bobot model tidak boleh masuk repo
+*.npz
+*.npy
+*.pt
+*.pth
+*.pkl
+artifacts/gallery_meta.json
+.ipynb_checkpoints/

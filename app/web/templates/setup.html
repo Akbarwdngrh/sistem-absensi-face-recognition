@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+{% block title %}Persiapan · {{ app_name }}{% endblock %}
+{% block page %}
+<div class="auth-wrap">
+  <section class="card auth-card">
+    <div class="eyebrow">Persiapan pertama</div>
+    <h1>Buat akun admin</h1>
+    <p class="muted">Aplikasi belum memiliki administrator. Buat akun admin pertama untuk
+      mengelola mahasiswa, dosen, kelas, dan sesi absensi.</p>
+
+    <form method="post" action="/setup" class="stack">
+      <input type="hidden" name="auth_csrf" value="{{ auth_csrf }}">
+      <div class="field">
+        <label for="nama">Nama lengkap</label>
+        <input id="nama" name="nama" autocomplete="name" required autofocus>
+      </div>
+      <div class="field">
+        <label for="username">Nama pengguna</label>
+        <input id="username" name="username" autocomplete="username" required
+               pattern="[a-z0-9._]{3,32}" title="3-32 karakter: huruf kecil, angka, titik, garis bawah">
+      </div>
+      <div class="field">
+        <label for="password">Kata sandi</label>
+        <input id="password" name="password" type="password" autocomplete="new-password" required minlength="10">
+        <small class="muted">Minimal 10 karakter, berbeda dari nama pengguna.</small>
+      </div>
+      <div class="field">
+        <label for="password2">Ulangi kata sandi</label>
+        <input id="password2" name="password2" type="password" autocomplete="new-password" required minlength="10">
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Simpan & lanjut</button>
+    </form>
+  </section>
+</div>
+{% endblock %}

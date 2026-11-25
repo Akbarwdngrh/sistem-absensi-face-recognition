@@ -1,0 +1,22 @@
+0.695000
+# ---------------------------------------------------------------
+# Ambang similarity untuk sistem absensi (PRD §9.5)
+# BARIS PERTAMA = nilai ambang yang dipakai pipeline evaluasi & live.
+# Baris 'key=value' di bawah hanya metadata untuk pelaporan.
+# FAR = false accept rate, TAR = true accept rate, FRR = false reject rate
+# ---------------------------------------------------------------
+threshold=0.6950000000000001
+aturan=FAR_rata <= 1.0% dengan TAR maksimal
+target_far_rata=0.01
+TAR=0.7591093117408907
+FRR=0.2408906882591093
+FAR_rata=0.009410750069756234
+FAR_maks=0.30111336032388664
+eer_threshold=0.705
+eer_far=0.25455465587044535
+eer_frr=0.2580971659919028
+split=val
+n_validasi=1976
+jumlah_orang=69
+model=vggface2
+dibuat=2026-10-07 10:07:33

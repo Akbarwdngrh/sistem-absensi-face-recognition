@@ -1,0 +1,236 @@
+{% extends "base.html" %}
+{% block title %}Admin · {{ app_name }}{% endblock %}
+{% block page %}
+
+<section class="hero row-between">
+  <div>
+    <div class="eyebrow">Panel administrator</div>
+    <h1>{{ user.nama }}</h1>
+    <p class="sub">Kelola mahasiswa, dosen, kelas, sesi absensi, dan data kehadiran.</p>
+  </div>
+  <div class="pill-group">
+    <span class="pill {% if engine.loaded %}pill-ok{% else %}pill-bad{% endif %}">
+      Model: {{ 'siap' if engine.loaded else 'belum siap' }} · {{ engine.device }}
+    </span>
+    <span class="pill">{{ engine.n_persons }} identitas</span>
+    <span class="pill">Ambang {{ '%.3f'|format(engine.threshold) }}</span>
+  </div>
+</section>
+
+<div class="stats-grid">
+  <div class="stat"><span>Mahasiswa</span><strong>{{ stats.mahasiswa or 0 }}</strong>
+    <small class="muted">{{ stats.mhs_aktif or 0 }} aktif</small></div>
+  <div class="stat"><span>Dosen</span><strong>{{ stats.dosen or 0 }}</strong></div>
+  <div class="stat"><span>Kelas</span><strong>{{ stats.kelas or 0 }}</strong></div>
+  <div class="stat"><span>Sesi terbuka</span><strong>{{ stats.sesi_buka or 0 }}</strong></div>
+  <div class="stat"><span>Kehadiran</span><strong>{{ stats.hadir or 0 }}</strong>
+    <small class="muted">{{ stats.manual or 0 }} koreksi manual</small></div>
+</div>
+
+<nav class="tabs" role="tablist">
+  <button class="tab is-active" data-tab="mhs" role="tab">Mahasiswa</button>
+  <button class="tab" data-tab="dosen" role="tab">Dosen</button>
+  <button class="tab" data-tab="kelas" role="tab">Kelas</button>
+  <button class="tab" data-tab="sesi" role="tab">Sesi Absensi</button>
+  <button class="tab" data-tab="hadir" role="tab">Kehadiran</button>
+  <button class="tab" data-tab="audit" role="tab">Audit</button>
+</nav>
+
+<!-- ============================ MAHASISWA ============================ -->
+<section class="tab-panel is-active" id="panel-mhs">
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>Tambah mahasiswa</h2>
+      <form class="stack" id="form-mhs">
+        <div class="field"><label for="mhs-nim">NIM</label>
+          <input id="mhs-nim" name="nim" inputmode="numeric" required></div>
+        <div class="field"><label for="mhs-nama">Nama lengkap</label>
+          <input id="mhs-nama" name="nama" required></div>
+        <div class="field"><label for="mhs-email">Email (opsional)</label>
+          <input id="mhs-email" name="email" type="email"></div>
+        <button class="btn btn-primary" type="submit">Simpan mahasiswa</button>
+      </form>
+      <p class="small muted mt-2">Enrollment wajah untuk mahasiswa dilakukan dari baris data mahasiswa.</p>
+    </div>
+    <div class="card">
+      <h2>Daftar mahasiswa</h2>
+      <div class="row">
+        <input id="mhs-search" class="input-grow" placeholder="Cari nama atau NIM…">
+        <button class="btn" id="mhs-refresh" type="button">Cari</button>
+      </div>
+      <div class="table-wrap mt-3">
+        <table class="table" id="tbl-mhs">
+          <thead><tr><th>NIM</th><th>Nama</th><th>Kelas</th><th>Wajah</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="pager mt-2">
+        <button class="btn btn-sm" data-page-mhs="prev" type="button">‹</button>
+        <span id="mhs-page" class="small muted">hal. 1</span>
+        <button class="btn btn-sm" data-page-mhs="next" type="button">›</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= DOSEN ============================== -->
+<section class="tab-panel" id="panel-dosen">
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>Tambah dosen</h2>
+      <form class="stack" id="form-dosen">
+        <div class="field"><label for="dsn-nama">Nama lengkap</label>
+          <input id="dsn-nama" name="nama" required></div>
+        <div class="field"><label for="dsn-nid">NID (opsional)</label>
+          <input id="dsn-nid" name="nid"></div>
+        <div class="field"><label for="dsn-email">Email</label>
+          <input id="dsn-email" name="email" type="email"></div>
+        <label class="check"><input type="checkbox" id="dsn-akun" checked> Buat akun login (role dosen)</label>
+        <div class="field" id="dsn-akun-fields">
+          <label for="dsn-username">Nama pengguna</label>
+          <input id="dsn-username" name="username" autocomplete="off">
+          <label for="dsn-password">Kata sandi sementara</label>
+          <input id="dsn-password" name="password" type="password" autocomplete="new-password">
+        </div>
+        <button class="btn btn-primary" type="submit">Simpan dosen</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Daftar dosen</h2>
+      <div class="table-wrap">
+        <table class="table" id="tbl-dosen">
+          <thead><tr><th>Nama</th><th>NID</th><th>Email</th><th>Akun</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================= KELAS ============================== -->
+<section class="tab-panel" id="panel-kelas">
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>Tambah kelas</h2>
+      <form class="stack" id="form-kelas">
+        <div class="field"><label for="kls-kode">Kode mata kuliah</label>
+          <input id="kls-kode" name="kode_mk" required></div>
+        <div class="field"><label for="kls-nama">Nama mata kuliah</label>
+          <input id="kls-nama" name="nama_mk" required></div>
+        <div class="field"><label for="kls-label">Label kelas</label>
+          <input id="kls-label" name="label" required placeholder="mis. SK7A"></div>
+        <div class="field"><label for="kls-dosen">Dosen pengampu</label>
+          <select id="kls-dosen" name="dosen_id"><option value="">— belum ditentukan —</option></select></div>
+        <div class="field"><label for="kls-ta">Tahun akademik</label>
+          <input id="kls-ta" name="tahun_akademik" placeholder="2026/2027"></div>
+        <div class="field"><label for="kls-sem">Semester</label>
+          <input id="kls-sem" name="semester" placeholder="1"></div>
+        <button class="btn btn-primary" type="submit">Simpan kelas</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Daftar kelas</h2>
+      <div class="table-wrap">
+        <table class="table" id="tbl-kelas">
+          <thead><tr><th>Kelas</th><th>Mata kuliah</th><th>Dosen</th><th>Anggota</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class="card card-flat mt-3" id="kelas-anggota-wrap" hidden>
+        <h3 id="kelas-anggota-title">Anggota kelas</h3>
+        <div class="row">
+          <select id="kelas-anggota-pilih" class="input-grow"></select>
+          <button class="btn" id="kelas-anggota-tambah" type="button">Tambah</button>
+        </div>
+        <ul class="pill-list mt-2" id="kelas-anggota-list"></ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== SESI ============================== -->
+<section class="tab-panel" id="panel-sesi">
+  <div class="grid grid-2">
+    <div class="card">
+      <h2>Buka sesi absensi</h2>
+      <form class="stack" id="form-sesi">
+        <div class="field"><label for="sesi-kelas">Kelas</label>
+          <select id="sesi-kelas" name="class_id" required></select></div>
+        <div class="field"><label for="sesi-tanggal">Tanggal</label>
+          <input id="sesi-tanggal" name="tanggal" type="date" required></div>
+        <div class="field"><label for="sesi-mulai">Mulai</label>
+          <input id="sesi-mulai" name="mulai_jam" type="time" value="08:00" required></div>
+        <div class="field"><label for="sesi-selesai">Selesai (opsional)</label>
+          <input id="sesi-selesai" name="selesai_jam" type="time"></div>
+        <div class="field"><label for="sesi-ket">Keterangan</label>
+          <input id="sesi-ket" name="keterangan"></div>
+        <button class="btn btn-primary" type="submit">Buka sesi</button>
+      </form>
+    </div>
+    <div class="card">
+      <h2>Daftar sesi</h2>
+      <div class="table-wrap">
+        <table class="table" id="tbl-sesi">
+          <thead><tr><th>Kelas</th><th>Tanggal</th><th>Mulai</th><th>Hadir</th><th>Status</th><th></th></tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ KEHADIRAN =========================== -->
+<section class="tab-panel" id="panel-hadir">
+  <div class="card">
+    <h2>Data kehadiran</h2>
+    <div class="row wrap">
+      <select id="h-class" class="input-grow"><option value="">Semua kelas</option></select>
+      <input id="h-tanggal" type="date" title="Tanggal">
+      <select id="h-status"><option value="">Semua status</option>
+        <option>HADIR</option><option>MANUAL</option><option>TOLAK</option></select>
+      <input id="h-q" placeholder="Cari nama / NIM…">
+      <button class="btn" id="h-search" type="button">Terapkan</button>
+      <a class="btn" id="h-csv" href="#">CSV</a>
+      <a class="btn" id="h-xlsx" href="#">Excel</a>
+    </div>
+    <div class="table-wrap mt-3">
+      <table class="table" id="tbl-hadir">
+        <thead><tr><th>Waktu</th><th>NIM</th><th>Nama</th><th>Kelas</th><th>Status</th>
+          <th>Kemiripan</th><th>Metode</th><th></th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="pager mt-2">
+      <button class="btn btn-sm" data-page-h="prev" type="button">‹</button>
+      <span id="h-page" class="small muted">hal. 1</span>
+      <button class="btn btn-sm" data-page-h="next" type="button">›</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============================== AUDIT ============================= -->
+<section class="tab-panel" id="panel-audit">
+  <div class="card">
+    <h2>Log aktivitas</h2>
+    <p class="small muted">Setiap perubahan penting (koreksi absensi, hapus data, ekspor)
+      tercatat di sini bersama pelaku dan waktunya.</p>
+    <div class="table-wrap mt-3">
+      <table class="table" id="tbl-audit">
+        <thead><tr><th>Waktu</th><th>Pengguna</th><th>Aksi</th><th>Entitas</th><th>Detail</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+    <div class="pager mt-2">
+      <button class="btn btn-sm" data-page-a="prev" type="button">‹</button>
+      <span id="a-page" class="small muted">hal. 1</span>
+      <button class="btn btn-sm" data-page-a="next" type="button">›</button>
+    </div>
+  </div>
+</section>
+
+{% endblock %}
+
+{% block scripts %}
+<script>window.ABSENSI_V2 = { csrf: "{{ csrf }}" };</script>
+<script src="/static/js/admin.js"></script>
+{% endblock %}

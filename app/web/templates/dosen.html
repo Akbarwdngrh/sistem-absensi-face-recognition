@@ -1,0 +1,95 @@
+{% extends "base.html" %}
+{% block title %}Dosen · {{ app_name }}{% endblock %}
+{% block page %}
+
+<section class="hero">
+  <div class="eyebrow">Panel dosen</div>
+  <h1>{{ user.nama }}</h1>
+  <p class="sub">Kelas yang Anda ampu, sesi yang sedang dibuka, dan rekap kehadiran.</p>
+</section>
+
+<div class="stats-grid">
+  <div class="stat"><span>Kelas diampu</span><strong>{{ stats.n_kelas or 0 }}</strong></div>
+  <div class="stat"><span>Total catatan</span><strong>{{ stats.total_catatan or 0 }}</strong></div>
+  <div class="stat"><span>Hadir</span><strong>{{ stats.hadir or 0 }}</strong></div>
+  <div class="stat"><span>Sesi terbuka</span><strong>{{ sesi_buka|length }}</strong></div>
+</div>
+
+<div class="grid grid-2">
+  <section class="card">
+    <h2>Kelas yang saya ampu</h2>
+    {% if not kelas %}
+      <p class="muted">Belum ada kelas yang ditugaskan kepada Anda. Hubungi admin.</p>
+    {% else %}
+      <div class="table-wrap">
+        <table class="table">
+          <thead><tr><th>Kelas</th><th>Mata kuliah</th><th>Anggota</th><th>Sesi</th><th></th></tr></thead>
+          <tbody>
+            {% for k in kelas %}
+            <tr>
+              <td><strong>{{ k.label }}</strong></td>
+              <td>{{ k.nama_mk }}</td>
+              <td><span class="count" data-class-mhs="{{ k.id }}">-</span></td>
+              <td><span class="count" data-class-sesi="{{ k.id }}">-</span></td>
+              <td>
+                <button class="btn btn-sm" data-kelas-detail="{{ k.id }}" type="button">Detail</button>
+                <a class="btn btn-sm" href="/api/dosen/export?fmt=csv&class_id={{ k.id }}">CSV</a>
+                <a class="btn btn-sm" href="/api/dosen/export?fmt=xlsx&class_id={{ k.id }}">Excel</a>
+              </td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+    {% endif %}
+  </section>
+
+  <section class="card">
+    <h2>Sesi yang sedang dibuka</h2>
+    {% if not sesi_buka %}
+      <p class="muted">Tidak ada sesi terbuka pada kelas Anda.</p>
+    {% else %}
+      <ul class="list">
+        {% for s in sesi_buka %}
+        <li>
+          <div>
+            <strong>{{ s.label }} · {{ s.nama_mk }}</strong>
+            <div class="small muted">{{ s.tanggal }} {{ s.mulai_at[11:16] }} ·
+              {{ s.n_hadir }} hadir / {{ s.n_anggota }} anggota</div>
+          </div>
+          <form method="post" action="/api/dosen/sesi/{{ s.id }}/tutup"
+                onsubmit="return closeSession(event, {{ s.id }})">
+            <button class="btn btn-sm" type="submit">Tutup sesi</button>
+          </form>
+        </li>
+        {% endfor %}
+      </ul>
+    {% endif %}
+  </section>
+</div>
+
+<section class="card mt-4">
+  <h2>Kehadiran terbaru (kelas Anda)</h2>
+  <div class="table-wrap">
+    <table class="table">
+      <thead><tr><th>Waktu</th><th>NIM</th><th>Nama</th><th>Kelas</th><th>Status</th><th>Kemiripan</th></tr></thead>
+      <tbody>
+        {% for r in terbaru %}
+        <tr>
+          <td class="mono small">{{ r.recorded_at }}</td>
+          <td class="mono">{{ r.nim }}</td>
+          <td>{{ r.nama }}</td>
+          <td>{{ r.kelas }}</td>
+          <td><span class="badge {{ 'hadir' if r.status == 'HADIR' else 'netral' }}">{{ r.status }}</span></td>
+          <td class="mono small">{{ '%.4f'|format(r.similarity) if r.similarity is not none else '-' }}</td>
+        </tr>
+        {% endfor %}
+        {% if not terbaru %}
+        <tr><td colspan="6" class="muted">Belum ada catatan kehadiran.</td></tr>
+        {% endif %}
+      </tbody>
+    </table>
+  </div>
+</section>
+
+{% endblock %}

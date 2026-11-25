@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="color-scheme" content="light dark">
+  <meta name="csrf-token" content="{{ csrf }}">
+  <title>{% block title %}{{ app_name }}{% endblock %}</title>
+  <link rel="stylesheet" href="/static/css/v2.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='8' fill='%234f46e5'/><circle cx='16' cy='16' r='6' fill='white'/></svg>">
+</head>
+<body>
+<a class="skip-link" href="#main">Lewati ke konten utama</a>
+
+<header class="topbar">
+  <a class="brand" href="/">
+    <span class="brand-mark" aria-hidden="true">◆</span>
+    <span class="brand-text">Absensi Wajah <em>V2</em></span>
+  </a>
+  <nav class="topnav">
+    {% if user %}
+      <a href="/{{ 'admin' if user.role == 'admin' else 'dosen' }}">Dashboard</a>
+      <a href="/absen">Absen</a>
+      <form method="post" action="/logout" class="inline-form">
+        <button class="btn btn-ghost btn-sm" type="submit">Keluar</button>
+      </form>
+    {% else %}
+      <a href="/absen">Absen</a>
+      <a class="btn btn-primary btn-sm" href="/login">Masuk</a>
+    {% endif %}
+  </nav>
+</header>
+
+<main id="main" class="main">
+  <div class="content">
+    {% if msg %}<div class="alert ok" role="status">{{ msg }}</div>{% endif %}
+    {% if err %}<div class="alert bad" role="alert">{{ err }}</div>{% endif %}
+    {% block page %}{% endblock %}
+  </div>
+</main>
+
+<footer class="footer">
+  <span>{{ app_name }} v{{ app_version }}</span>
+  <span class="muted">Pemrosesan biometrik dilakukan di server. Gambar wajah tidak disimpan.</span>
+</footer>
+
+{% block scripts %}{% endblock %}
+</body>
+</html>

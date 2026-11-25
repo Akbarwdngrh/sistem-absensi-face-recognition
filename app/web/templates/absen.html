@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+{% block title %}Absensi · {{ app_name }}{% endblock %}
+{% block page %}
+
+<section class="hero">
+  <div class="eyebrow">Absensi mahasiswa</div>
+  <h1>Absen tanpa perlu akun</h1>
+  <p class="sub">Pilih sesi yang sedang dibuka, lalu berdiri di depan kamera.
+    Seluruh wajah dalam frame dikenali otomatis dan dicatat satu per satu.</p>
+</section>
+
+{% if disabled %}
+  <div class="alert bad" role="alert">Absensi publik sedang dinonaktifkan administrator.</div>
+{% else %}
+
+{% if not engine_ready %}
+  <div class="alert bad" role="alert">
+    Mesin pengenalan wajah belum siap{% if engine_error %} ({{ engine_error }}){% endif %}.
+    Hubungi administrator.
+  </div>
+{% endif %}
+
+{% if not sessions %}
+  <div class="card empty">
+    <span class="big" aria-hidden="true">🗓️</span>
+    <h3>Belum ada sesi absensi yang terbuka</h3>
+    <p>Sesi dibuka oleh dosen/admin. Muat ulang halaman ini setelah sesi dibuka.</p>
+    <button class="btn mt-3" type="button" onclick="location.reload()">Muat ulang</button>
+  </div>
+{% else %}
+
+<div class="grid grid-2">
+  <section class="card">
+    <h2>1 · Pilih sesi</h2>
+    <div class="field">
+      <label for="sessionSelect">Sesi absensi yang sedang dibuka</label>
+      <select id="sessionSelect">
+        {% for s in sessions %}
+          <option value="{{ s.id }}" data-label="{{ s.label }}" data-mk="{{ s.nama_mk }}">
+            {{ s.nama_mk }} — {{ s.label }} · {{ s.tanggal }} ({{ s.mulai_at[11:16] }})
+          </option>
+        {% endfor %}
+      </select>
+    </div>
+
+    <div id="sessionInfo" class="info-box">
+      <div><span class="muted">Kelas</span><strong id="infoKelas">-</strong></div>
+      <div><span class="muted">Mata kuliah</span><strong id="infoMk">-</strong></div>
+      <div><span class="muted">Waktu</span><strong id="infoWaktu">-</strong></div>
+      <div><span class="muted">Anggota kelas</span><strong id="infoAnggota">-</strong></div>
+    </div>
+
+    <div class="row mt-4">
+      <button class="btn btn-primary" id="startBtn" type="button" {% if not engine_ready %}disabled{% endif %}>
+        ▶ Mulai Kamera
+      </button>
+      <button class="btn" id="stopBtn" type="button" disabled>■ Stop</button>
+    </div>
+
+    <dl class="facts mt-4">
+      <div><dt>Status kamera</dt><dd id="camState">Mati</dd></div>
+      <div><dt>Wajah terdeteksi</dt><dd id="faceCount">0</dd></div>
+      <div><dt>Tercatat</dt><dd id="recordedCount">0</dd></div>
+      <div><dt>Frame diproses</dt><dd id="frameCount">0</dd></div>
+    </dl>
+  </section>
+
+  <section class="card">
+    <h2>2 · Berdiri di depan kamera</h2>
+    <div class="cam-stage" id="camStage">
+      <video id="video" playsinline autoplay muted aria-label="Pratinjau kamera"></video>
+      <canvas id="overlay"></canvas>
+      <div class="cam-overlay" id="overlayMsg">
+        <span class="big" aria-hidden="true">📷</span>
+        <p>Kamera aktif setelah menekan <strong>Mulai Kamera</strong>.</p>
+      </div>
+    </div>
+    <div class="cam-status" id="camStatus" aria-live="polite">
+      <span class="pip" aria-hidden="true"></span>
+      <span id="camStatusText">Kamera belum aktif.</span>
+    </div>
+    <div id="faceList" class="face-list" aria-live="polite"></div>
+    <p class="small muted mt-3" id="engineInfo"></p>
+  </section>
+</div>
+
+<details class="card mt-4">
+  <summary>Petunjuk & batasan</summary>
+  <ul class="small muted">
+    <li>Wajah tidak harus diklik atau placed di kotak tertentu — kotak hanya umpan balik visual.</li>
+    <li>Beberapa wajah dapat terdeteksi bersamaan; setiap wajah diproses terpisah.</li>
+    <li>Wajah yang tidak dikenali tidak menghasilkan catatan kehadiran.</li>
+    <li>Dosen/admin dapat melakukan koreksi manual dengan jejak audit bila perlu.</li>
+    <li>Gambar frame tidak disimpan; hanya hasil verifikasi yang dicatat.</li>
+  </ul>
+</details>
+
+{% endif %}
+{% endif %}
+{% endblock %}
+
+{% block scripts %}
+<meta name="csrf-public" content="{{ auth_csrf }}">
+<script src="/static/js/absen.js"></script>
+{% endblock %}

@@ -1,0 +1,39 @@
+# Dependensi V2.
+#
+# CATATAN PENTING (sama seperti V1):
+#   `facenet-pytorch` mendeklarasikan numpy<2 / Pillow<10.3 / torch<2.3 sehingga
+#   `pip install -r requirements.txt` akan GAGAL (ResolutionImpossible) bila
+#   facenet-pytorch ikut Solve. Pasang terpisah:
+#       pip install --no-deps facenet-pytorch==2.6.0
+#
+# Environment Dev2/.venv dibuat dengan `--system-site-packages` sehingga memakai
+# torch/numpy/opencv yang sudah terpasang (read-only, tanpa perubahan global).
+# Bila ingin instalasi benar-benar terisolasi: uninstall dari venv lalu
+# `pip install torch==2.14.1 torchvision==0.29.1 --index-url .../cu126`.
+
+# --- Model / inference ---
+torch==2.14.1
+torchvision==0.29.1
+# facenet-pytorch==2.6.0  -> pasang dengan --no-deps (lihat catatan di atas)
+opencv-python==4.14.0.94
+numpy==2.5.3
+Pillow==12.3.0
+pillow-heif==1.8.0
+
+# --- Backend web ---
+fastapi==0.143.3
+uvicorn==0.54.0
+jinja2==3.1.6
+python-multipart==0.0.32
+python-dotenv==1.2.4
+pydantic==2.13.5
+
+# --- Keamanan ---
+argon2-cffi==25.1.0
+
+# --- Ekspor ---
+pandas==3.0.6
+openpyxl==3.1.5
+
+# --- Pengujian ---
+httpx==0.28.1

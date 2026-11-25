@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}Masuk · {{ app_name }}{% endblock %}
+{% block page %}
+<div class="auth-wrap">
+  <section class="card auth-card">
+    <h1>Masuk</h1>
+    <p class="muted">Administrator dan dosen masuk di sini. Mahasiswa tidak perlu akun —
+      gunakan <a href="/absen">halaman absensi</a>.</p>
+
+    <form method="post" action="/login" class="stack">
+      <input type="hidden" name="auth_csrf" value="{{ auth_csrf }}">
+      <div class="field">
+        <label for="username">Nama pengguna</label>
+        <input id="username" name="username" autocomplete="username" required autofocus>
+      </div>
+      <div class="field">
+        <label for="password">Kata sandi</label>
+        <input id="password" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <button class="btn btn-primary btn-block" type="submit">Masuk</button>
+    </form>
+  </section>
+</div>
+{% endblock %}
